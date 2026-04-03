@@ -5,7 +5,7 @@ HEADER = 64
 PORT = 5050
 
 SERVER = socket.gethostbyname(socket.gethostname())
-#print(SERVER)
+print(SERVER)
 #print(socket.gethostname())
 
 ADDR = (SERVER, PORT)
@@ -22,18 +22,23 @@ def handle_client(conn, addr):
 
     connected = True
     while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            for client in clients:
-                if client != conn:
-                    client.send(msg.encode(FORMAT))
-                    
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-            print(f"[{addr}] {msg}")
-            conn.send("Msg received".encode(FORMAT))
+        try:
+            msg_length = conn.recv(HEADER).decode(FORMAT)
+            if msg_length:
+                msg_length = int(msg_length)
+                msg = conn.recv(msg_length).decode(FORMAT)
+                for client in clients:
+                    if client != conn:
+                        client.send(msg.encode(FORMAT))
+                        
+                if msg == DISCONNECT_MESSAGE:
+                    connected = False
+                print(f"[{addr}] {msg}")
+                # conn.send("Msg received".encode(FORMAT))
+        except:
+            print(f"[DISCONNECTED] {addr} connection lost")
+            break
+
 
     conn.close()
 
