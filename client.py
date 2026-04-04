@@ -1,4 +1,5 @@
 import socket
+import threading 
 
 HEADER = 64
 PORT = 5050
@@ -19,9 +20,38 @@ def send(msg):
     client.send(message)
     # print(client.recv(2048).decode(FORMAT))
 
-while True:
-    msg = input()
-    send(msg)
+def receive():
+    while True:
+        try:
+            msg_length = client.recv(HEADER)
+            
+            if not msg_length:
+                break
+            
+            msg_length = int(msg_length.decode(FORMAT))
+            msg = client.recv(msg_length).decode(FORMAT)
+            print(f"\n{msg}")
+            print("You: ", end="", flush=True)
+            
 
-    if msg == "DISCONNECT" or "disconnect" or "Disconnect":
+        except:
+            print("[ERROR] Connection closed")
+            break
+
+thread = threading.Thread(target=receive)
+thread.start()
+
+username = input("Enter you name:")
+send(username)
+
+
+while True:
+    msg = input("You:")
+
+    if msg.lower() == "disconnect":
+        send(DISCONNECT_MESSAGE)
         break
+    
+    
+    send(msg)
+    
